@@ -27,7 +27,6 @@ function findField(type) {
 function populateField(type, field, email) {
     // If field is not visible, then simulate click to make it so
     if (!field.is(':visible')) {
-      console.log('field is not visible', type);
       if (type === 'bcc') {
         $('span:contains("Add Bcc")').click();
       } else if (type === 'cc') {
@@ -50,24 +49,14 @@ function clearField(field, email) {
   var fieldElement = field.get(0);
   if (fieldElement.value) {
     if (fieldElement.value.indexOf(email) !== -1) {
-      fieldElement.value = FieldElement.value.replace(email, "").
+      fieldElement.value = fieldElement.value.replace(email, "").
         replace(/^,?\s*/, "");
     }
   }
 }
 
-function waitForCompose(fn, args) {
-  console.log('waiting for compose...');
-  toField = findField('to');
-  if (toField.is(':visible')) {
-    fn.apply(args);
-  } else {
-    setTimeout(waitForCompose(fn, args), 1000);
-  }
-}
-
 function swapToBcc(from_email, cc_email) {
-  console.log('swapping bcc!');
+  console.log('swapping to bcc!');
   console.log(from_email, cc_email);
 
   bccField = findField('bcc');
@@ -109,8 +98,6 @@ var main = function(){
         }
       }
 
-      console.log('eh?');
-      //waitForCompose(swapToBcc, [from_email, cc_email]);
       setTimeout(swapToBcc, 1000, from_email, cc_email);
     }
   });
