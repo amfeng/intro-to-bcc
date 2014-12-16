@@ -1,7 +1,7 @@
 {
-  "name": "Gmail.js",
+  "name": "intro-to-bcc",
   "version": "0.1",
-  "description": "Hello World Gmail chrome extension",
+  "description": "Gmail helper to swap recipients in email introductions.",
   "content_scripts": [
     {
       "matches": ["https://*.google.com/*"],

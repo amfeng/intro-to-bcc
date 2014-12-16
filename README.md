@@ -1,12 +1,7 @@
-# Gmail.js Chrome Extension
+# intro-to-bcc
 
-Hello world chrome extension using gmail.js
+Chrome extension for Gmail to let you easily swap recipients in email
+introductions.
 
-This is a sample chome extension that uses gmail.js to build apps on top of Gmail.
-
-The manifest in this repo bypasses the new Content Security Policy (CSP) enforced by Gmail.
-
-http://github.com/kartiktalwar/gmail.js
-
-
-
+(For all those times you've said "Thanks Amber! (=> bcc)" and had to manually
+switch the sender to bcc and the recipient out of the cc line.)
