@@ -24,16 +24,28 @@ function findField(type) {
   setTimeout(findField(type), 500);
 }
 
-function populateField(type, field, email) {
-    // If field is not visible, then simulate click to make it so
-    if (!field.is(':visible')) {
-      if (type === 'bcc') {
-        $('span:contains("Add Bcc")').click();
-      } else if (type === 'cc') {
-        $('span:contains("Add Cc")').click();
-      }
+function clickBccButton() {
+  elements = $('span:contains("Bcc")');
+  for (var i = 0; i < elements.length; i++) {
+    el = elements[i];
+    aria_label = el.getAttribute('aria-label')
+    if (aria_label != null && aria_label.match('Add Bcc')) {
+      $(el).click();
     }
+  }
+}
 
+function removeExisting(email) {
+  element = $($('.vR .vN')[0]);
+  if (element != undefined) {
+    element = $(element);
+    if (element.attr('email') === email) {
+      element.find('.vM').click();
+    }
+  }
+}
+
+function populateField(field, email) {
     // Add email to field, if not already in there
     var fieldElement = field.get(0);
     if (fieldElement.value) {
@@ -59,15 +71,19 @@ function swapToBcc(from_email, cc_email) {
   console.log('swapping to bcc!');
   console.log(from_email, cc_email);
 
+  removeExisting(from_email);
+
   bccField = findField('bcc');
   ccField = findField('cc');
   toField = findField('to');
 
   // from => bcc, cc => to
-  populateField('bcc', bccField, from_email);
-  populateField('to', toField, cc_email);
+  populateField(bccField, from_email);
+  populateField(toField, cc_email);
   clearField(ccField, cc_email);
   clearField(toField, from_email);
+
+  clickBccButton();
 }
 
 var main = function(){
@@ -98,10 +114,9 @@ var main = function(){
         }
       }
 
-      setTimeout(swapToBcc, 1000, from_email, cc_email);
+      setTimeout(swapToBcc, 500, from_email, cc_email);
     }
   });
 }
-
 
 refresh(main);
