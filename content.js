@@ -6,6 +6,8 @@ var g = document.createElement('script');
 g.src = chrome.extension.getURL('gmail.js');
 (document.head || document.documentElement).appendChild(g);
 
-var s = document.createElement('script');
-s.src = chrome.extension.getURL('main.js');
-(document.head || document.documentElement).appendChild(s);
+setTimeout(function() {
+  var s = document.createElement('script');
+  s.src = chrome.extension.getURL('main.js');
+  (document.head || document.documentElement).appendChild(s);
+}, 100);
