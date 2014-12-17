@@ -86,6 +86,23 @@ function swapToBcc(from_email, cc_email) {
   clickBccButton();
 }
 
+function findRepliedToThread(composeElement) {
+  // Many parents up ...
+  threadElement = composeElement.$el.parent().parent().parent().parent();
+
+  whitelistedClasses = ['ii', 'gt', 'adP', 'adO'];
+  classes = threadElement.find('.adP.adO').attr('class').split(' ');
+  threadId = undefined;
+  for (var i = 0; i < classes.length; i++) {
+    currentClass = classes[i];
+    if (whitelistedClasses.indexOf(currentClass) === -1) {
+      // The format of the class is mTHREAD_ID, so slice off the first char.
+      threadId = currentClass.slice(1);
+      return threadId;
+    }
+  }
+}
+
 var main = function(){
   gmail = new Gmail();
   user_email = gmail.get.user_email();
@@ -94,9 +111,13 @@ var main = function(){
     if (type === "reply") {
       email_data = gmail.get.email_data();
 
-      // Assume that you're replying from the last email. There's no actual
-      // way to tell which email you replied to. ):
-      last_email = email_data.threads[email_data.last_email];
+      repliedToEmail = findRepliedToThread(compose);
+      if (repliedToEmail == undefined) {
+        // We can't figure it out for some reason, so just guess it's the
+        // last email in the chain.
+        repliedToEmail = email_data.last_email;
+      }
+      last_email = email_data.threads[repliedToEmail];
 
       from_email = last_email.from_email
       cc_email = last_email.cc[0]
