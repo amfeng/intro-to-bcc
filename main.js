@@ -8,7 +8,7 @@ function refresh(f) {
   }
 }
 
-function findField(type) {
+function findField(type, fields) {
   // type must be of 'bcc' or 'cc'
   var field = $('textarea[name="' + type + '"]');
   if (field.length > 0) {
@@ -17,20 +17,21 @@ function findField(type) {
     // Only populate if the field is not already in focus (otherwise, it can
     // become very hard to edit)
     if (focusedElem !== field.get(0)) {
-      return field;
+      fields[type] = field;
+      return;
     }
-    focusedElem.focus();
+    focusedElem.blur();
   }
-  setTimeout(findField(type), 500);
+  setTimeout(findField(type, fields), 500);
 }
 
-function clickBccButton() {
+function findBccButton() {
   elements = $('span:contains("Bcc")');
   for (var i = 0; i < elements.length; i++) {
     el = elements[i];
     aria_label = el.getAttribute('aria-label')
     if (aria_label != null && aria_label.match('Add Bcc')) {
-      $(el).click();
+      return $(el);
     }
   }
 }
@@ -73,17 +74,27 @@ function swapToBcc(from_email, cc_email) {
 
   removeExisting(from_email);
 
-  bccField = findField('bcc');
-  ccField = findField('cc');
-  toField = findField('to');
+  console.log('finding fields!');
 
+  fields = {}
+  bccField = findField('bcc', fields);
+  ccField = findField('cc', fields);
+  toField = findField('to', fields);
+
+  console.log('populating fields!');
   // from => bcc, cc => to
-  populateField(bccField, from_email);
-  populateField(toField, cc_email);
-  clearField(ccField, cc_email);
-  clearField(toField, from_email);
+  populateField(fields.bcc, from_email);
+  populateField(fields.to, cc_email);
 
-  clickBccButton();
+  console.log('clearing fields!');
+  clearField(fields.cc, cc_email);
+  clearField(fields.to, from_email);
+
+  console.log('revealing bcc');
+  bccButton = findBccButton()
+  if (bccButton != undefined) {
+    bccButton.click();
+  }
 }
 
 function findRepliedToThread(composeElement) {
@@ -111,31 +122,46 @@ var main = function(){
     if (type === "reply") {
       email_data = gmail.get.email_data();
 
-      repliedToEmail = findRepliedToThread(compose);
-      if (repliedToEmail == undefined) {
-        // We can't figure it out for some reason, so just guess it's the
-        // last email in the chain.
-        repliedToEmail = email_data.last_email;
-      }
-      last_email = email_data.threads[repliedToEmail];
+      setTimeout(function() {
+      bccButton = findBccButton();
+      swapButton = bccButton.clone();
+      swapButton.text('Swap to Bcc');
+      swapButton.attr('aria-label', 'Swap to Bcc');
+      swapButton.attr('data-tooltip', 'Swap to Bcc');
+      swapButton.removeClass('qB');
 
-      from_email = last_email.from_email
-      cc_email = last_email.cc[0]
+      swapButton.insertAfter(bccButton);
 
-      // If there's no cc, check the to line for anything that's not your
-      // email.
-      if (cc_email === undefined) {
-        to_emails = last_email.to
-        for (var i = 0; i < to_emails.length; i++) {
-          to_email = to_emails[i];
-          if (!to_email.match(user_email)) {
-            cc_email = to_email;
-            break;
+      swapButton.click(function() {
+        repliedToEmail = findRepliedToThread(compose);
+        if (repliedToEmail == undefined) {
+          // We can't figure it out for some reason, so just guess it's the
+          // last email in the chain.
+          repliedToEmail = email_data.last_email;
+        }
+        last_email = email_data.threads[repliedToEmail];
+
+        from_email = last_email.from_email
+        cc_email = last_email.cc[0]
+
+        // If there's no cc, check the to line for anything that's not your
+        // email.
+        if (cc_email === undefined) {
+          to_emails = last_email.to
+          for (var i = 0; i < to_emails.length; i++) {
+            to_email = to_emails[i];
+            if (!to_email.match(user_email)) {
+              cc_email = to_email;
+              break;
+            }
           }
         }
-      }
 
-      setTimeout(swapToBcc, 500, from_email, cc_email);
+        swapToBcc(from_email, cc_email);
+
+        swapButton.remove();
+      });
+      }, 50);
     }
   });
 }
