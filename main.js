@@ -1,3 +1,11 @@
+// TODO:
+// - Clean up the terrible code. (:
+// - Add credits back wherever necessary.
+// - Take out the console.logs.
+// - Figure out the edge cases (more than two recipients, etc) and document
+//   them.
+// - Publish to the Chrome store somehow!
+
 var gmail;
 
 function refresh(f) {
